@@ -1,67 +1,42 @@
-terraform {
-  required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-  }
+provider "kubernetes" {
+  config_path = var.kubeconfig
 }
 
-resource "kubernetes_cluster_role" "persistent_volume_manager" {
+resource "kubernetes_persistent_volume" "pv" {
   metadata {
-    name = "${var.context.resource.name}-pv-manager"
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["persistentvolumes"]
-    verbs      = ["create", "delete", "get", "list", "patch", "update", "watch"]
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "persistent_volume_manager" {
-  metadata {
-    name = "${var.context.resource.name}-pv-manager"
-  }
-  
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.persistent_volume_manager.metadata[0].name
-  }
-  
-  subject {
-    kind      = "ServiceAccount"
-    name      = "dynamic-rp"
-    namespace = "radius-system"
-  }
-}
-
-resource "kubernetes_persistent_volume" "this" {
-  metadata {
-    name = var.context.resource.name
+    name = var.name
     labels = {
       app      = "redis"
-      resource = var.context.resource.name
-      # Label pods with the application name so `rad run` can find the logs.
-      "radapp.io/application" = var.context.application != null ? var.context.application.name : ""
+      resource = var.name
+      "radapp.io/application" = var.application != "" ? var.application : "someting"
     }
   }
 
   spec {
-    storage_class_name = "manual"
-    
+    storage_class_name = var.storage_class
+
     capacity = {
-      storage = var.context.resource.properties.size
+      storage = var.size
     }
-    
-    access_modes = ["ReadWriteOnce"]
-    
+
+    access_modes = [var.access_mode]
+
     persistent_volume_source {
       host_path {
         path = var.host_path
         type = "DirectoryOrCreate"
       }
     }
+  }
+}
+
+output "result" {
+  value = {
+    kind         = "persistent"
+    storageClass = kubernetes_persistent_volume.pv.spec[0].storage_class_name
+    capacity     = kubernetes_persistent_volume.pv.spec[0].capacity["storage"]
+    accessModes  = kubernetes_persistent_volume.pv.spec[0].access_modes
+    hostPath     = kubernetes_persistent_volume.pv.spec[0].persistent_volume_source[0].host_path[0].path
+    name         = kubernetes_persistent_volume.pv.metadata[0].name
   }
 }
