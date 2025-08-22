@@ -21,7 +21,6 @@ resource "kubernetes_persistent_volume" "pv" {
   metadata {
     name = var.context.resource.name
     labels = {
-      app      = "redis"
       resource = var.context.resource.name
       # Label pods with the application name so `rad run` can find the logs.
       "radapp.io/application" = var.context.application != null ? var.context.application.name : ""
@@ -53,10 +52,6 @@ output "result" {
     ]
     values = {
       kind         = "persistent"
-      storageClass = var.storage_class
-      capacity     = var.context.resource.properties.size
-      accessModes  = [var.context.resource.properties.accessMode == null ? var.access_mode : var.context.resource.properties.accessMode]
-      hostPath     = var.host_path
       name         = var.context.resource.name
     }
   }
