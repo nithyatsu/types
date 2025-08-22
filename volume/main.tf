@@ -7,6 +7,36 @@ terraform {
   }
 }
 
+resource "kubernetes_cluster_role" "persistent_volume_manager" {
+  metadata {
+    name = "${var.context.resource.name}-pv-manager"
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["persistentvolumes"]
+    verbs      = ["create", "delete", "get", "list", "patch", "update", "watch"]
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "persistent_volume_manager" {
+  metadata {
+    name = "${var.context.resource.name}-pv-manager"
+  }
+  
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.persistent_volume_manager.metadata[0].name
+  }
+  
+  subject {
+    kind      = "ServiceAccount"
+    name      = "dynamic-rp"
+    namespace = "radius-system"
+  }
+}
+
 resource "kubernetes_persistent_volume" "this" {
   metadata {
     name = var.context.resource.name
