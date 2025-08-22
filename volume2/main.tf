@@ -47,7 +47,7 @@ output "result" {
     values = {
       kind         = "persistent"
       name         = var.context.resource.name
-      size         = var.context.resource.size
+      size         = var.context.resource.properties.size
       host_path    = var.host_path
       storage_class_name = var.storage_class
       access_modes = var.access_mode
