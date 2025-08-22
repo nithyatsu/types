@@ -39,7 +39,7 @@ resource "kubernetes_persistent_volume" "pv" {
     
     persistent_volume_source {
       host_path {
-        path = var.host_path
+        path = "/mnt/data"
         type = "DirectoryOrCreate"
       }
     }
