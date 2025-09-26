@@ -23,7 +23,7 @@ resource "kubernetes_persistent_volume_claim" "pvc" {
   }
 
   spec {
-    storage_class_name = var.storage_class
+    storage_class_name = var.storage_class != "" ? var.storage_class : null
 
     resources {
       requests = {
