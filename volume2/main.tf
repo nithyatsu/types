@@ -12,6 +12,8 @@ locals {
 }
 
 resource "kubernetes_persistent_volume_claim" "pvc" {
+  wait_until_bound = false
+  
   metadata {
     name      = var.context.resource.name
     namespace = local.namespace
