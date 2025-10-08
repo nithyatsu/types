@@ -18,12 +18,9 @@ resource "kubernetes_persistent_volume_claim" "pvc" {
     name      = var.context.resource.name
     namespace = local.namespace
     labels = {
-      # "radapp.io/resource" = var.context.resource.name
-      # "radapp.io/resource-type" = var.context.resource.type
-      # Label pods with the application name so `rad run` can find the logs.
+      "radapp.io/resource" = var.context.resource.name
       "radapp.io/application" = var.context.application != null ? var.context.application.name : ""
       "radapp.io/environment" = var.context.environment != null ? var.context.environment.name : ""
-
     }
   }
 
